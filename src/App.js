@@ -1,3 +1,4 @@
+import {useEffect, useState} from "react";
 import './index.scss';
 
 const questions = [
@@ -22,37 +23,57 @@ const questions = [
   },
 ];
 
-function Result() {
+function Result({correct}) {
   return (
     <div className="result">
-      <img src="https://cdn-icons-png.flaticon.com/512/2278/2278992.png" />
-      <h2>Вы отгадали 3 ответа из 10</h2>
-      <button>Попробовать снова</button>
+      <img src="https://cdn-icons-png.flaticon.com/512/2278/2278992.png"  alt='alt'/>
+      <h2>Вы отгадали {correct} ответа из {questions.length}</h2>
+      <button><a href="/">Попробовать снова</a></button>
     </div>
   );
 }
 
-function Game() {
+function Game({title, variants, currentIndex, nextQ}) {
   return (
     <>
       <div className="progress">
-        <div style={{ width: '50%' }} className="progress__inner"></div>
+        <div style={{width: (Math.ceil(100*currentIndex/questions.length) + '%' )}} className="progress__inner"/>
       </div>
-      <h1>Что такое useState?</h1>
+      <h1>{title}</h1>
       <ul>
-        <li>Это функция для хранения данных компонента</li>
-        <li>Это глобальный стейт</li>
-        <li>Это когда на ты никому не нужен</li>
+        {variants.map((el, index) => {
+          return <li onClick={() => nextQ(index)} key={index}>{el}</li>
+        })}
       </ul>
     </>
   );
 }
 
 function App() {
+  const [currentIndex, setCurrentIndex] = useState(1);
+  const [currentQ, setCurrentQ] = useState(questions[currentIndex-1]);
+  const [finish, setFinish] = useState(false);
+  const [correct, setCorrect] = useState(0);
+
+  const nextQ = (el) => {
+    if (currentQ.correct === el) {
+      setCorrect(correct + 1);
+    }
+
+    currentIndex === questions.length ?
+      setFinish(true)
+      :
+      setCurrentIndex(currentIndex + 1);
+      setCurrentQ(questions[currentIndex]);
+  }
+
   return (
     <div className="App">
-      <Game />
-      {/* <Result /> */}
+      {finish ?
+        <Result correct={correct}/>
+        :
+        <Game {...currentQ} nextQ={nextQ} currentIndex={currentIndex}/>
+      }
     </div>
   );
 }
